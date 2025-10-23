@@ -3,6 +3,7 @@ import userService from "../services/login";
 import blogService from "../services/blogs";
 import reducer, { Notify } from "./notification";
 
+
 const initialState = {
   username: "",
   password: "",
@@ -27,9 +28,6 @@ const userSlice = createSlice({
     logout(state, action) {
       localStorage.removeItem("loggedInUser");
       state.user = null;
-      dispatch(
-        Notify({ type: "success", content: "User successfully logged out" })
-      );
     },
   },
 });

@@ -1,27 +1,21 @@
-export const LoginForm = ({
-  handleLogin,
-}) => {
+import { Button, TextField } from "@mui/material";
+
+export const LoginForm = ({ handleLogin }) => {
   return (
     <form onSubmit={handleLogin}>
-      <label>
-        username{" "}
-        <input
-          type="text"
-          name="username"
-        />
-      </label>
+      <TextField label="username" type="text" name="username" />
       <br />
 
-      <label>
-        password{" "}
-        <input
-          type="password"
-          name="password"
-          autoComplete="off"
-        />
-      </label>
+      <TextField
+        type="password"
+        name="password"
+        label="password"
+        autoComplete="off"
+      />
       <br />
-      <button type="submit">login</button>
+      <Button variant="contained" type="submit">
+        login
+      </Button>
     </form>
   );
 };

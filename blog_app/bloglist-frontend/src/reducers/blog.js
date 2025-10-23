@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import blogService from "../services/blogs";
 import { Notify } from "./notification";
+import commentService from "../services/comment";
 
 const initialState = [];
 
@@ -15,12 +16,16 @@ const blogSlice = createSlice({
       return state.concat(action.payload);
     },
     like(state, action) {
-        const blog = state.find(blog => blog.id === action.payload)
-        ++blog.likes
+      const blog = state.find((blog) => blog.id === action.payload);
+      ++blog.likes;
     },
     remove(state, action) {
-      return state.filter(blog => blog.id !== action.payload)
-    }
+      return state.filter((blog) => blog.id !== action.payload);
+    },
+    comment(state, action) {
+      const blog = state.find((blog) => blog.id === action.payload.blogId);
+      blog.comments.push(action.payload.body);
+    },
   },
 });
 
@@ -34,46 +39,55 @@ export const initializeBlogs = () => {
 export const makeBlog = (blog) => {
   return async (dispatch) => {
     try {
-        const newBlog = await blogService.create(blog);
-        dispatch(add(newBlog));
-        dispatch(Notify({type:'success', content: 'Blog added successfully'}))
-    }
-    catch (err) {
-        dispatch(Notify({ type: "error", content: "Add Blog failed !" }));
+      const newBlog = await blogService.create(blog);
+      dispatch(add(newBlog));
+      dispatch(Notify({ type: "success", content: "Blog added successfully" }));
+    } catch (err) {
+      dispatch(Notify({ type: "error", content: "Add Blog failed !" }));
     }
   };
 };
 
 export const likeBlog = (id, blogPost) => {
-    return async dispatch => {
-        try {
-            const blog = await blogService.likeBlog(id, blogPost)
-            dispatch(like(id))
-            dispatch(
-              Notify({
-                type: "success",
-                content: `You liked ${blog.title}`,
-              })
-            );
-        }
-        catch(err) {
-            dispatch(Notify({ type: "error", content: "An error occured" }));
-        }
-    }
-}
-
-export const removeBlog = (id) => {
-  return async dispatch => {
+  return async (dispatch) => {
     try {
-      await blogService.deleteBlog(id)
-      dispatch(remove(id))
-      dispatch(Notify({type:'success', content: `blog has been deleted`}))
-    }
-    catch(err) {
+      const blog = await blogService.likeBlog(id, blogPost);
+      dispatch(like(id));
+      dispatch(
+        Notify({
+          type: "success",
+          content: `You liked ${blog.title}`,
+        })
+      );
+    } catch (err) {
       dispatch(Notify({ type: "error", content: "An error occured" }));
     }
-  }
-}
+  };
+};
 
-export const { add, like, remove, setBlogs } = blogSlice.actions;
+export const removeBlog = (id) => {
+  return async (dispatch) => {
+    try {
+      await blogService.deleteBlog(id);
+      dispatch(remove(id));
+      dispatch(Notify({ type: "success", content: `blog has been deleted` }));
+    } catch (err) {
+      dispatch(Notify({ type: "error", content: "An error occured" }));
+    }
+  };
+};
+
+export const addComment = (blogId, body) => {
+  return async (dispatch) => {
+    try {
+      await commentService.comment({ blogId, body });
+      dispatch(comment({blogId, body}));
+      dispatch(Notify({ type: "success", content: `comment added` }));
+    } catch (err) {
+      dispatch(Notify({ type: "error", content: `${err}` }));
+    }
+  };
+};
+
+export const { add, like, remove, setBlogs, comment } = blogSlice.actions;
 export default blogSlice.reducer;
